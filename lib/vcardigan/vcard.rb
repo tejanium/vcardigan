@@ -24,27 +24,26 @@ module VCardigan
 
     def build(match)
       self.class.new.tap do |card|
-        if match
-          # Set version number
-          card.version = match[2]
-          lines = "#{match[1].strip}#{match[3].strip}"
+        # Set version number
+        card.version = match[2]
+        lines = "#{match[1].strip}#{match[3].strip}"
 
-          # Add the parsed properties to this vCard
-          lines.each_line do |line|
-            property = VCardigan::Property.parse(card, line)
-            card.add_prop(property)
-          end
+        # Add the parsed properties to this vCard
+        lines.each_line do |line|
+          property = VCardigan::Property.parse(card, line)
+          card.add_prop(property)
         end
       end
     end
 
     def parse(data)
       match = VCARD_PATTERN.match(data)
-      build(match)
+      build(match) if match
     end
 
     def scan(data)
       scan = data.scan(VCARD_PATTERN)
+      return if scan.empty?
       scan.map do |match|
         build match.unshift(nil) # Offset by 1
       end
