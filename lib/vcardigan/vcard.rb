@@ -22,20 +22,32 @@ module VCardigan
       @group = nil
     end
 
-    def parse(data)
-      match = VCARD_PATTERN.match(data)
-      if match
-        # Set version number
-        @version = match[2]
-        lines = "#{match[1].strip}#{match[3].strip}"
+    def build(match)
+      self.class.new.tap do |card|
+        if match
+          # Set version number
+          card.version = match[2]
+          lines = "#{match[1].strip}#{match[3].strip}"
 
-        # Add the parsed properties to this vCard
-        lines.each_line do |line|
-          property = VCardigan::Property.parse(self, line)
-          add_prop(property)
+          # Add the parsed properties to this vCard
+          lines.each_line do |line|
+            property = VCardigan::Property.parse(card, line)
+            card.add_prop(property)
+          end
         end
       end
-      self
+    end
+
+    def parse(data)
+      match = VCARD_PATTERN.match(data)
+      build(match)
+    end
+
+    def scan(data)
+      scan = data.scan(VCARD_PATTERN)
+      scan.map do |match|
+        build match.unshift(nil) # Offset by 1
+      end
     end
 
     def [](group)
@@ -57,7 +69,7 @@ module VCardigan
       if @group
         # If there's a group, add it to the name
         name = "#{@group}.#{name}"
-        
+
         # Reset group to nil
         @group = nil
       end
@@ -121,13 +133,6 @@ module VCardigan
       fn(*args)
     end
 
-    # Private ##########
-    private
-
-    def build_prop(name, *args)
-      VCardigan::Property.create(self, name, *args)
-    end
-
     def add_prop(property)
       name = property.name
       group = property.group
@@ -137,7 +142,7 @@ module VCardigan
       unless @fields.has_key? name
         @fields[name] = []
       end
-      
+
       # Add the property to the field array
       @fields[name].push(property)
 
@@ -151,6 +156,13 @@ module VCardigan
         # Add the property to the groups array
         @groups[group].push(property)
       end
+    end
+
+    # Private ##########
+    private
+
+    def build_prop(name, *args)
+      VCardigan::Property.create(self, name, *args)
     end
 
     def validate

@@ -5,7 +5,7 @@ describe VCardigan::VCard do
   describe '#init' do
     context 'no options' do
       let(:vcard) { VCardigan.create }
-      
+
       it 'should set default version' do
         vcard.version.should == '4.0'
       end
@@ -184,7 +184,7 @@ describe VCardigan::VCard do
         vcard.name
       end
     end
-    
+
     context '#fullname' do
       it 'should call method_missing with method fn' do
         vcard.should_receive(:method_missing).with(:fn)
@@ -243,6 +243,45 @@ describe VCardigan::VCard do
       it 'should add the properties to the fields array' do
         fields.should have_key('n')
         fields.should have_key('fn')
+      end
+    end
+  end
+
+  describe '#scan' do
+    context 'multiple content' do
+      let(:data) { File.read(File.dirname(__FILE__) + '/../helpers/joe_and_foo.vcf') }
+      let(:vcards) { VCardigan.scan(data) }
+
+      it 'should get 2 cards' do
+        vcards.size.should eql 2
+      end
+
+      context 'first card' do
+        let(:vcard) { vcards.first }
+        let(:fields) { vcard.instance_variable_get(:@fields) }
+
+        it 'should set the version' do
+          vcard.version.should == '4.0'
+        end
+
+        it 'should add the properties to the fields array' do
+          fields.should have_key('n')
+          fields.should have_key('fn')
+        end
+      end
+
+      context 'last card' do
+        let(:vcard) { vcards.last }
+        let(:fields) { vcard.instance_variable_get(:@fields) }
+
+        it 'should set the version' do
+          vcard.version.should == '4.0'
+        end
+
+        it 'should add the properties to the fields array' do
+          fields.should have_key('n')
+          fields.should have_key('fn')
+        end
       end
     end
   end

@@ -1,0 +1,10 @@
+BEGIN:VCARD
+VERSION:4.0
+N:Strummer;Joe;;;
+FN:Joe Strummer
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+N:Bar;Foo;;;
+FN:Foo Bar
+END:VCARD

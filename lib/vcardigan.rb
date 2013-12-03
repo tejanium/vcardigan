@@ -16,6 +16,9 @@ module VCardigan
       VCardigan::VCard.new.parse(*args)
     end
 
+    def scan(*args)
+      VCardigan::VCard.new.scan(*args)
+    end
   end
 
 end
